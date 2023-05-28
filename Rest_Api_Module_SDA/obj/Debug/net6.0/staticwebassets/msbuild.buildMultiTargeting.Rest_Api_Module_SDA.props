@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Rest_Api_Module_SDA.props" />
+</Project>
