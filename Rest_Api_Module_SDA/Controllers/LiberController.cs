@@ -12,7 +12,7 @@ namespace Rest_Api_Module_SDA.Controllers
         /// Merr gjithe librat
         /// </summary>
         /// <returns></returns>
-        [HttpGet("MerrLibrat")]
+        [HttpGet("merrlibrat")]
         public IActionResult MerrLibrat()
         {
             //Nqs useri mund ta aksesoje kete api
@@ -25,10 +25,27 @@ namespace Rest_Api_Module_SDA.Controllers
             return new OkObjectResult(librat);
         }
 
-        //public IActionResult MerrLiberID(int ID)
-        //{
+        [HttpGet("merrliberid")]
+        public IActionResult MerrLiberID(int ID)
+        {
+            if (ID == 0)
+            {
+                throw new Exception("ID nuk eshte e sakte");
+            }
+            //Hapi 1
+            //Merr librat ne memorie
+            var librat = GjeneroLibra();
+            var liber = librat.Where(p => p.ID.Equals(ID))
+                .FirstOrDefault();
 
-        //}
+            //Kthe not found nqs nuk ka liber me kete ID
+            if(liber == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(liber);
+        }
 
         private List<Liber> GjeneroLibra()
         {
