@@ -34,6 +34,7 @@ namespace Rest_Api_Module_SDA.Controllers
             }
             //Hapi 1
             //Merr librat ne memorie
+
             var librat = GjeneroLibra();
             var liber = librat.Where(p => p.ID.Equals(ID))
                 .FirstOrDefault();
@@ -47,6 +48,36 @@ namespace Rest_Api_Module_SDA.Controllers
             return Ok(liber);
         }
 
+        [HttpPost("shtoliber")]
+        public IActionResult ShtoLiber([FromBody] Liber liber) 
+        {
+            //Hapi 1
+            //Merr te dhenat
+            var libratNeDB = GjeneroLibra();
+            var numriParaShtimit = libratNeDB.Count;
+            //Merr titullin e ri
+            var titulli = liber.Titull;
+            //Kontrollojme nqs egziston
+            var egzistonTitulli = libratNeDB.Where(p => p.Titull.Equals(titulli))
+                .FirstOrDefault();
+            //Nqs egziston kthejme error
+            if(egzistonTitulli != null)
+            {
+                throw new Exception("Ky liber egziston ne databaze");
+            }
+
+            //Nqs jo bejme shtimin e librit
+            libratNeDB.Add(liber);
+            var numriPasShtimit = libratNeDB.Count;
+
+            if(numriPasShtimit == 3)
+            {
+                return Ok("Libri u shtua me sukses");
+            }
+
+            //Nqs libri nuk eshte shtuar ka ndodhur nje problem me shtuarje e librit
+            throw new Exception("Pati nje problem me shtuarjen e librit");
+        }
         private List<Liber> GjeneroLibra()
         {
             var librat = new List<Liber>()
