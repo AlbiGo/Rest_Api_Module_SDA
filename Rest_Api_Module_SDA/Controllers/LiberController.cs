@@ -8,6 +8,11 @@ namespace Rest_Api_Module_SDA.Controllers
     [ApiController]
     public class LiberController : ControllerBase
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public LiberController(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
         /// <summary>
         /// Merr gjithe librat
         /// </summary>
@@ -16,11 +21,16 @@ namespace Rest_Api_Module_SDA.Controllers
         public IActionResult MerrLibrat()
         {
             //Nqs useri mund ta aksesoje kete api
-            //if(false)
-            //{
-            //    return StatusCode(401);
-            //}
-
+            var token = _httpContextAccessor
+                .HttpContext.Request.Headers["token"];
+            if(string.IsNullOrEmpty(token))
+            {
+                return StatusCode(401);
+            }
+            if(token != "test")
+            {
+                return StatusCode(403, "Token nuk eshte i sakte");
+            }
             var librat = GjeneroLibra();
             return new OkObjectResult(librat);
         }
@@ -69,6 +79,8 @@ namespace Rest_Api_Module_SDA.Controllers
             //Nqs jo bejme shtimin e librit
             libratNeDB.Add(liber);
             var numriPasShtimit = libratNeDB.Count;
+            //_context.Librat.Add(liber);
+            //_context.SaveChanges();
 
             if(numriPasShtimit == 3)
             {
@@ -77,6 +89,47 @@ namespace Rest_Api_Module_SDA.Controllers
 
             //Nqs libri nuk eshte shtuar ka ndodhur nje problem me shtuarje e librit
             throw new Exception("Pati nje problem me shtuarjen e librit");
+        }
+
+        [HttpPut("modifikoliber")]
+        public IActionResult ModifikoLiber([FromBody] Liber liber)
+        {
+            var librat = GjeneroLibra();
+            var id = liber.ID;
+            var egziston = librat.Where(p => p.ID == liber.ID)
+                .FirstOrDefault();
+
+            //Kontrollo nqs egziston
+            if(egziston == null)
+            {
+                throw new Exception("Libri nuk egziston");
+            }
+
+            //Update DB
+            egziston.Status = liber.Status;
+            //_context.SaveChanges();
+            return Ok("Libri u perditesua");
+
+        }
+
+        [HttpDelete("fshiliber")]
+        public IActionResult FshiLiber(int id)
+        {
+            var librat = GjeneroLibra();
+            
+            var egziston = librat.Where(p => p.ID == id)
+                .FirstOrDefault();
+
+            //Kontrollo nqs egziston
+            if (egziston == null)
+            {
+                throw new Exception("Libri nuk egziston");
+            }
+
+            librat.Remove(egziston);
+
+            return Ok("Libri u fshi me sukses");
+
         }
         private List<Liber> GjeneroLibra()
         {
